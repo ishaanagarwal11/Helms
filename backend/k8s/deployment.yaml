@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend-container
+        image: mytestacrhelms.azurecr.io/backend:BADTAG
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_HOST
+          value: "db-service"
+        - name: DB_USER
+          value: "root"
+        - name: DB_PASS
+          value: "MySuperSecret"
+        - name: DB_NAME
+          value: "testdb"
+        - name: QUEUE_HOST
+          value: "queue-service"
+        # For demonstration, let's add a readiness/liveness probe
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
